@@ -1,0 +1,26 @@
+body {
+	background-color: #353535;
+}
+
+.wrapper {
+	text-align: center;
+}
+
+.wrapper span{
+	background-color: #353535;
+	color: #cecece;
+	border: none;
+	user-select: none;
+	border-color: #353535;
+	text-align: right;
+	width: 50%;
+	margin-top: 15%;
+}
+
+.timer {
+	font-size: 12rem;
+}
+
+.specifier {
+	font-size: 2rem;
+}
