@@ -170,7 +170,7 @@ document.addEventListener('keydown', (event) => {
   }
 
   const synth = window.speechSynthesis;
-  if (event.key == ' ' && !synth.pending) {
+  if (event.key == ' ' && !synth.pending && go) {
     // TODO: Escalar o speech pra caso haja horas dias e afins
     let output = '';
     if (timer[5].textContent || timer[4].textContent) {
