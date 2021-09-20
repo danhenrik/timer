@@ -25,14 +25,18 @@ goButton.addEventListener('click', (event) => {
 });
 
 const resetButton = document.getElementById('resetButton');
-resetButton.addEventListener('click', (event) => {
+resetButton.addEventListener('click', () => {
+  reset();
+});
+
+function reset() {
   timer.forEach((tm) => (tm.textContent = ''));
   separator.forEach((sep) => (sep.hidden = true));
   go = false;
   digitsCounter = 2;
   timePointer = 0;
   SeparatorPointer = 0;
-});
+}
 
 function init() {
   go = true;
@@ -40,7 +44,6 @@ function init() {
   initCountdown(convertedTimer);
 }
 
-// TODO: Escalar esse countdown pro padrão programado
 function initCountdown(timerArr) {
   const interv = setInterval(() => {
     let hours = `${timerArr[5].textContent}${timerArr[4].textContent}`;
@@ -60,12 +63,17 @@ function initCountdown(timerArr) {
       hours--;
       minutes = 59;
     }
+    // TODO: Reset is triggering alarm, have a look at this.
+    // TODO: Any key or mouse click triggers voice
+    // TODO: Make the go button into a pause button during the timer and then:
+    // TODO: Go button becomes ok (cancel the bell ringing) at the end of timer (do this in the same moment that you start refining the front)
     if (hours == -1) {
       const audio = new Audio('./Alarm-clock-bell-ringing-sound-effect.mp3');
       audio.play();
       const alarm = setInterval(() => {
         audio.play();
         document.addEventListener('keydown', () => {
+          reset();
           clearInterval(alarm);
         });
       }, 1000);
@@ -117,7 +125,7 @@ function convertTimer(timerArr) {
     minutes -= 60;
   }
   if (hours > 99) {
-    //* Need to be 2 digits long
+    //* Need to be a max of 2 digits long
     hours = 99;
   }
   seconds = seconds.toString();
@@ -134,7 +142,7 @@ function convertTimer(timerArr) {
 }
 
 document.addEventListener('keydown', (event) => {
-  // TODO: Dar uma refatorada
+  // TODO: Refactor
   if (numbers.includes(event.key) && timePointer < 6) {
     if (digitsCounter == 2) {
       separator[SeparatorPointer].hidden = false;
@@ -149,7 +157,6 @@ document.addEventListener('keydown', (event) => {
     digitsCounter++;
   }
 
-  // TODO: Deletar voltando inclusive os 2 pontos.
   if (event.key == 'Backspace' && timer[0].textContent != '' && !go) {
     for (let i = 0; i < timePointer; i++) {
       if (timer[i + 1] == undefined) timer[i].textContent = '';
@@ -171,7 +178,6 @@ document.addEventListener('keydown', (event) => {
 
   const synth = window.speechSynthesis;
   if (event.key == ' ' && !synth.pending && go) {
-    // TODO: Escalar o speech pra caso haja horas dias e afins
     let output = '';
     if (timer[5].textContent || timer[4].textContent) {
       if (timer[5].textContent == 0 && timer[4].textContent == 1) {
@@ -193,12 +199,13 @@ document.addEventListener('keydown', (event) => {
     } else {
       output += `${timer[1].textContent}${timer[0].textContent} seconds left.`;
     }
-    
+
     const speech = new SpeechSynthesisUtterance(output);
     const voices = synth.getVoices();
     speech.voice = voices[2];
     synth.speak(speech);
   }
+
   /* //Debug
   console.log(
     'digitsCounter',
