@@ -174,12 +174,26 @@ document.addEventListener('keydown', (event) => {
     // TODO: Escalar o speech pra caso haja horas dias e afins
     let output = '';
     if (timer[5].textContent || timer[4].textContent) {
-      output += `${timer[5].textContent}${timer[4].textContent} hours,`;
+      if (timer[5].textContent == 0 && timer[4].textContent == 1) {
+        output += `${timer[4].textContent} hour,`;
+      } else {
+        output += `${timer[5].textContent}${timer[4].textContent} hours,`;
+      }
     }
     if (timer[3].textContent || timer[2].textContent) {
-      output += `${timer[3].textContent}${timer[2].textContent} minutes and`;
+      if (timer[3].textContent == 0 && timer[2].textContent == 1) {
+        output += `${timer[2].textContent} minute and`;
+      } else {
+        output += `${timer[3].textContent}${timer[2].textContent} minutes and`;
+      }
     }
-    output += `${timer[1].textContent}${timer[0].textContent} seconds.`;
+
+    if (timer[1].textContent == 0 && timer[0].textContent == 1) {
+      output += `${timer[0].textContent} second left.`;
+    } else {
+      output += `${timer[1].textContent}${timer[0].textContent} seconds left.`;
+    }
+    
     const speech = new SpeechSynthesisUtterance(output);
     const voices = synth.getVoices();
     speech.voice = voices[2];
