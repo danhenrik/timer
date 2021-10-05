@@ -1,4 +1,11 @@
 const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+// TODO: Mouse click also triggers voice
+// TODO: Make the go button into a pause button during the timer and then:
+// TODO: Go button becomes ok (cancel the bell ringing) at the end of timer (do this in the same moment that you start refining the front)
+// TODO: Tirar essas variáveis do escopo global
+// TODO: No final substituir 00 s por um sino tocando ou algo do tipo (faz parte do embelezamento da página)
+// TODO: Abstrair um pouco mais as ideias e organizar melhor as funções
 let go = false;
 let digitsCounter = 2;
 let timePointer = 0;
@@ -28,9 +35,9 @@ document.getElementById('resetButton').onclick = reset;
 
 function initCountdown(timer) {
   interv = setInterval(() => {
-    let hours = `${timer[5].textContent}${timer[4].textContent}`;
-    let minutes = `${timer[3].textContent}${timer[2].textContent}`;
-    let seconds = `${timer[1].textContent}${timer[0].textContent}`;
+    let hours = parseInt(`${timer[5].textContent}${timer[4].textContent}`);
+    let minutes = parseInt(`${timer[3].textContent}${timer[2].textContent}`);
+    let seconds = parseInt(`${timer[1].textContent}${timer[0].textContent}`);
 
     seconds--;
 
@@ -44,9 +51,6 @@ function initCountdown(timer) {
       minutes = 59;
     }
 
-    // TODO: Any key or mouse click triggers voice
-    // TODO: Make the go button into a pause button during the timer and then:
-    // TODO: Go button becomes ok (cancel the bell ringing) at the end of timer (do this in the same moment that you start refining the front)
     if (hours == -1) {
       ringing = true;
       const audio = new Audio('./Alarm.mp3');
@@ -115,15 +119,14 @@ function UseSynth() {
   }
 }
 function out(hours, minutes, seconds) {
-  console.log(`[hours] ${hours}\n[minutes] ${minutes}\n[seconds] ${seconds}`);
-
-  if (timePointer == 5 && minutes < 10) {
+  
+  if (separatorPointer == 3 && minutes < 10) {
     minutes = `0${minutes}`;
   }
   if (seconds < 10) {
     seconds = `0${seconds}`;
   }
-
+  
   // Remove hour and it separator
   if (hours == 0) {
     timer[5].textContent = '';
@@ -144,16 +147,15 @@ function out(hours, minutes, seconds) {
     timer[3].textContent = minutes[0];
     timer[2].textContent = minutes[1];
   }
-  if (seconds) {
-    timer[1].textContent = seconds[0];
-    timer[0].textContent = seconds[1];
-  }
+  timer[1].textContent = seconds[0];
+  timer[0].textContent = seconds[1];
+  console.log(`[hours] ${hours}\n[minutes] ${minutes}\n[seconds] ${seconds}`);
 }
 
 function convertTimer(timer) {
-  let hours = `${timer[5].textContent}${timer[4].textContent}` || '';
-  let minutes = `${timer[3].textContent}${timer[2].textContent}` || '';
-  let seconds = `${timer[1].textContent}${timer[0].textContent}` || '';
+  let hours = parseInt(`${timer[5].textContent}${timer[4].textContent}`) || '';
+  let minutes = parseInt(`${timer[3].textContent}${timer[2].textContent}`) || '';
+  let seconds = parseInt(`${timer[1].textContent}${timer[0].textContent}`) || '';
 
   if (seconds > 60) {
     minutes++;
@@ -196,7 +198,6 @@ function init() {
 }
 
 function reset() {
-  // TODO: Reset is transforming everything in the entry
   clearInterval(interv);
   timer.forEach((tm) => (tm.textContent = ''));
   separator.forEach((sep) => (sep.hidden = true));
@@ -209,11 +210,11 @@ function reset() {
 function main() {
   document.addEventListener('keydown', (event) => {
     // TODO: Refactor
-    console.log(event);
+    console.log(
+      `[go] ${go}\n[digitsCounter] ${digitsCounter}\n[timePointer] ${timePointer}\n[separatorPointer] ${separatorPointer}`
+    );
+    console.log(event.key);
     if (numbers.includes(event.key) && timePointer < 6) {
-      console.log(
-        `[go] ${go}\n[digitsCounter] ${digitsCounter}\n[timePointer] ${timePointer}\n[separatorPointer] ${separatorPointer}`
-      );
       if (digitsCounter == 2) {
         separator[separatorPointer].hidden = false;
         separatorPointer++;
