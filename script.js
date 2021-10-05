@@ -51,17 +51,6 @@ function initCountdown(timer) {
       seconds = `0${seconds}`;
     }
 
-    if (minutes == 0) {
-      console.log('entrou no if');
-      timer[3].textContent = '';
-      timer[2].textContent = '';
-      separator[1].hidden = true;
-    }
-    if (hours == 0) {
-      timer[5].textContent = '';
-      timer[4].textContent = '';
-      separator[2].hidden = true;
-    }
     // TODO: Reset is triggering alarm, have a look at this.
     // TODO: Any key or mouse click triggers voice
     // TODO: Make the go button into a pause button during the timer and then:
@@ -82,11 +71,19 @@ function initCountdown(timer) {
       minutes = minutes?.toString();
       hours = hours?.toString();
 
-      if (hours) {
+      if (hours == 0) {
+        timer[5].textContent = '';
+        timer[4].textContent = '';
+        separator[2].hidden = true;
+      } else if (hours) {
         timer[5].textContent = hours[0];
         timer[4].textContent = hours[1];
       }
-      if (minutes) {
+      if (minutes == 0) {
+        timer[3].textContent = '';
+        timer[2].textContent = '';
+        separator[1].hidden = true;
+      } else if (minutes) {
         timer[3].textContent = minutes[0];
         timer[2].textContent = minutes[1];
       }
