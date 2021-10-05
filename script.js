@@ -1,11 +1,11 @@
-// TODO: Essa parada de reset no final ta bugando tudo (com o enter) possível solução permitir enter apenas se tivermos algum valor nas entradas
-
 const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 let go = false;
 let digitsCounter = 2;
 let timePointer = 0;
 let separatorPointer = 0;
 let interv;
+let ringing = false;
+const synth = window.speechSynthesis;
 
 const timer = [
   document.getElementById('seconds-1'),
@@ -44,19 +44,12 @@ function initCountdown(timer) {
       minutes = 59;
     }
 
-    if (timePointer == 5 && minutes < 10) {
-      minutes = `0${minutes}`;
-    }
-    if (timePointer == 3 && seconds < 10) {
-      seconds = `0${seconds}`;
-    }
-
-    // TODO: Reset is triggering alarm, have a look at this.
     // TODO: Any key or mouse click triggers voice
     // TODO: Make the go button into a pause button during the timer and then:
     // TODO: Go button becomes ok (cancel the bell ringing) at the end of timer (do this in the same moment that you start refining the front)
     if (hours == -1) {
-      const audio = new Audio('./Alarm-clock-bell-ringing-sound-effect.mp3');
+      ringing = true;
+      const audio = new Audio('./Alarm.mp3');
       audio.play();
       const alarm = setInterval(() => {
         audio.play();
@@ -71,28 +64,90 @@ function initCountdown(timer) {
       minutes = minutes?.toString();
       hours = hours?.toString();
 
-      if (hours == 0) {
-        timer[5].textContent = '';
-        timer[4].textContent = '';
-        separator[2].hidden = true;
-      } else if (hours) {
-        timer[5].textContent = hours[0];
-        timer[4].textContent = hours[1];
-      }
-      if (minutes == 0) {
-        timer[3].textContent = '';
-        timer[2].textContent = '';
-        separator[1].hidden = true;
-      } else if (minutes) {
-        timer[3].textContent = minutes[0];
-        timer[2].textContent = minutes[1];
-      }
-      if (seconds) {
-        timer[1].textContent = seconds[0];
-        timer[0].textContent = seconds[1];
-      }
+      out(hours, minutes, seconds);
     }
   }, 1000);
+}
+
+function UseSynth() {
+  if (
+    !['Escape', 'Enter', ...numbers].includes(event.key) &&
+    !synth.pending &&
+    go &&
+    !ringing
+  ) {
+    const hours = parseInt(`${timer[5].textContent}${timer[4].textContent}`);
+    const minutes = parseInt(`${timer[3].textContent}${timer[2].textContent}`);
+    const seconds = parseInt(`${timer[1].textContent}${timer[0].textContent}`);
+
+    let output = '';
+    if (hours) {
+      if (hours == 1) {
+        output += `${hours} hour`;
+      } else {
+        output += `${hours} hours`;
+      }
+    }
+    if (minutes) {
+      output += ', ';
+      if (minutes == 1) {
+        output += `${minutes} minute`;
+      } else if (minutes != 0) {
+        output += `${minutes} minutes`;
+      }
+    }
+
+    if (seconds == 0) {
+      output += ' left.';
+    } else {
+      output += ' and ';
+      if (seconds == 1) {
+        output += `${seconds} second left.`;
+      } else {
+        output += `${seconds} seconds left.`;
+      }
+    }
+
+    const speech = new SpeechSynthesisUtterance(output);
+    const voices = synth.getVoices();
+    speech.voice = voices[2];
+    synth.speak(speech);
+  }
+}
+function out(hours, minutes, seconds) {
+  console.log(`[hours] ${hours}\n[minutes] ${minutes}\n[seconds] ${seconds}`);
+
+  if (timePointer == 5 && minutes < 10) {
+    minutes = `0${minutes}`;
+  }
+  if (seconds < 10) {
+    seconds = `0${seconds}`;
+  }
+
+  // Remove hour and it separator
+  if (hours == 0) {
+    timer[5].textContent = '';
+    timer[4].textContent = '';
+    separator[2].hidden = true;
+  } else if (hours) {
+    timer[5].textContent = hours[0];
+    timer[4].textContent = hours[1];
+  }
+  // Remove minutes and it separator
+  if (minutes == 0 && hours == 0) {
+    timer[3].textContent = '';
+    timer[2].textContent = '';
+    separator[1].hidden = true;
+  } else if (minutes < 10 && timePointer < 5) {
+    timer[2].textContent = minutes[0];
+  } else if (minutes) {
+    timer[3].textContent = minutes[0];
+    timer[2].textContent = minutes[1];
+  }
+  if (seconds) {
+    timer[1].textContent = seconds[0];
+    timer[0].textContent = seconds[1];
+  }
 }
 
 function convertTimer(timer) {
@@ -129,12 +184,7 @@ function convertTimer(timer) {
   minutes = minutes.toString();
   hours = hours.toString();
 
-  timer[5].textContent = hours[0];
-  timer[4].textContent = hours[1];
-  timer[3].textContent = minutes[0];
-  timer[2].textContent = minutes[1];
-  timer[1].textContent = seconds[0];
-  timer[0].textContent = seconds[1];
+  out(hours, minutes, seconds);
 }
 
 function init() {
@@ -159,7 +209,7 @@ function reset() {
 function main() {
   document.addEventListener('keydown', (event) => {
     // TODO: Refactor
-    console.log(event.key);
+    console.log(event);
     if (numbers.includes(event.key) && timePointer < 6) {
       console.log(
         `[go] ${go}\n[digitsCounter] ${digitsCounter}\n[timePointer] ${timePointer}\n[separatorPointer] ${separatorPointer}`
@@ -196,34 +246,16 @@ function main() {
       init();
     }
 
-    const synth = window.speechSynthesis;
-    if (event.key == ' ' && !synth.pending && go) {
-      let output = '';
-      if (timer[5].textContent || timer[4].textContent) {
-        if (timer[5].textContent == 0 && timer[4].textContent == 1) {
-          output += `${timer[4].textContent} hour,`;
-        } else {
-          output += `${timer[5].textContent}${timer[4].textContent} hours,`;
-        }
-      }
-      if (timer[3].textContent || timer[2].textContent) {
-        if (timer[3].textContent == 0 && timer[2].textContent == 1) {
-          output += `${timer[2].textContent} minute and`;
-        } else {
-          output += `${timer[3].textContent}${timer[2].textContent} minutes and`;
-        }
-      }
-
-      if (timer[1].textContent == 0 && timer[0].textContent == 1) {
-        output += `${timer[0].textContent} second left.`;
-      } else {
-        output += `${timer[1].textContent}${timer[0].textContent} seconds left.`;
-      }
-
-      const speech = new SpeechSynthesisUtterance(output);
-      const voices = synth.getVoices();
-      speech.voice = voices[2];
-      synth.speak(speech);
+    if (event.key == 'Escape') {
+      reset();
+    }
+    if (
+      !['Escape', 'Enter', ...numbers].includes(event.key) &&
+      !synth.pending &&
+      go &&
+      !ringing
+    ) {
+      UseSynth();
     }
   });
 }
