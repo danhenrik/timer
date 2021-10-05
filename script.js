@@ -222,7 +222,7 @@ function main() {
       `[go] ${go}\n[digitsCounter] ${digitsCounter}\n[timePointer] ${timePointer}\n[separatorPointer] ${separatorPointer}`
     );
     console.log(event.key);
-    if (numbers.includes(event.key) && timePointer < 6) {
+    if (numbers.includes(event.key) && timePointer < 6 && !go) {
       if (digitsCounter == 2) {
         separator[separatorPointer].hidden = false;
         separatorPointer++;
