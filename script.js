@@ -64,6 +64,10 @@
             reset();
             clearInterval(alarm);
           });
+          document.addEventListener('click', () => {
+            reset();
+            clearInterval(alarm);
+          });
         }, 1000);
         clearInterval(interv);
       } else {
@@ -219,7 +223,6 @@
     digitsCounter = 2;
     timePointer = 0;
     separatorPointer = 0;
-    main();
   }
 
   function main() {
@@ -265,12 +268,18 @@
       if (event.key == 'Escape') {
         reset();
       }
+
       if (
         !['Escape', 'Enter', ...numbers].includes(event.key) &&
         !synth.pending &&
         go &&
         !ringing
       ) {
+        UseSynth();
+      }
+    });
+    document.addEventListener('click', () => {
+      if (!synth.pending && go && !ringing) {
         UseSynth();
       }
     });
