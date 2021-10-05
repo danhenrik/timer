@@ -94,19 +94,22 @@ function UseSynth() {
         output += `${hours} hours`;
       }
     }
-    if (minutes) {
+    if (hours && minutes) {
       output += ', ';
+    }
+    if (minutes) {
       if (minutes == 1) {
         output += `${minutes} minute`;
       } else if (minutes != 0) {
         output += `${minutes} minutes`;
       }
     }
-
+    if (minutes && seconds) {
+      output += ' and ';
+    }
     if (seconds == 0) {
       output += ' left.';
     } else {
-      output += ' and ';
       if (seconds == 1) {
         output += `${seconds} second left.`;
       } else {
