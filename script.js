@@ -35,8 +35,10 @@ document.getElementById('resetButton').onclick = reset;
 
 function initCountdown(timer) {
   interv = setInterval(() => {
-    let hours = parseInt(`${timer[5].textContent}${timer[4].textContent}`);
-    let minutes = parseInt(`${timer[3].textContent}${timer[2].textContent}`);
+    let hours =
+      parseInt(`${timer[5].textContent}${timer[4].textContent}`) || '';
+    let minutes =
+      parseInt(`${timer[3].textContent}${timer[2].textContent}`) || '';
     let seconds = parseInt(`${timer[1].textContent}${timer[0].textContent}`);
 
     seconds--;
@@ -119,20 +121,21 @@ function UseSynth() {
   }
 }
 function out(hours, minutes, seconds) {
-  
   if (separatorPointer == 3 && minutes < 10) {
     minutes = `0${minutes}`;
   }
   if (seconds < 10) {
     seconds = `0${seconds}`;
   }
-  
+
   // Remove hour and it separator
   if (hours == 0) {
     timer[5].textContent = '';
     timer[4].textContent = '';
     separator[2].hidden = true;
   } else if (hours) {
+    console.log('hours captured');
+    console.log(hours);
     timer[5].textContent = hours[0];
     timer[4].textContent = hours[1];
   }
@@ -154,8 +157,10 @@ function out(hours, minutes, seconds) {
 
 function convertTimer(timer) {
   let hours = parseInt(`${timer[5].textContent}${timer[4].textContent}`) || '';
-  let minutes = parseInt(`${timer[3].textContent}${timer[2].textContent}`) || '';
-  let seconds = parseInt(`${timer[1].textContent}${timer[0].textContent}`) || '';
+  let minutes =
+    parseInt(`${timer[3].textContent}${timer[2].textContent}`) || '';
+  let seconds =
+    parseInt(`${timer[1].textContent}${timer[0].textContent}`) || '';
 
   if (seconds > 60) {
     minutes++;
