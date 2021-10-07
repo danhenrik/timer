@@ -128,15 +128,12 @@
     minutes = minutes?.toString();
     hours = hours?.toString();
 
-    console.log(`[hours] ${hours}\n[minutes] ${minutes}\n[seconds] ${seconds}`);
     if (minutes < 10 && separatorPointer == 3) {
       minutes = `0${parseInt(minutes)}`;
     }
     if (seconds < 10) {
       seconds = `0${parseInt(seconds)}`;
     }
-    console.log(minutes);
-    console.log(seconds);
     // Remove hour and it separator
     if (hours == 0) {
       timer[0] = '';
@@ -155,8 +152,6 @@
       timer[3] = '';
       separator[1].hidden = true;
     } else if (minutes < 10 && separatorPointer < 3) {
-      console.log('caiu aqui');
-      console.log(minutes[0]);
       timer[2] = '';
       timer[3] = minutes[0];
     } else if (minutes) {
@@ -195,6 +190,8 @@
     separatorPointer = 0;
     ringing = false;
     out(timer);
+    // Main is needed to work on githubpages.
+    main();
     // TODO: Final animation
   }
 
