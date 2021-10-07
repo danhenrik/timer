@@ -42,6 +42,7 @@
   // Plays tha alarm sound on the client browser.
   function playAlarm() {
     ringing = true;
+    const alarm;
     const audio = new Audio('./Alarm.mp3');
     audio.play();
     const stop = () => {
@@ -49,7 +50,7 @@
       audio.pause();
       clearInterval(alarm);
     };
-    const alarm = setInterval(() => {
+    alarm = setInterval(() => {
       audio.play();
       document.addEventListener('keydown', () => {
         stop();
