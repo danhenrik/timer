@@ -195,8 +195,6 @@
     separatorPointer = 0;
     ringing = false;
     out(timer);
-    // Main is needed to work on githubpages.
-    // main();
     // TODO: Final animation
   }
 
