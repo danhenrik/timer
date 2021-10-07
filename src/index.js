@@ -46,9 +46,9 @@
     const audio = new Audio('./Alarm.mp3');
     audio.play();
     const stop = () => {
-      reset();
       audio.pause();
       clearInterval(alarm);
+      reset();
     };
     alarm = setInterval(() => {
       audio.play();
