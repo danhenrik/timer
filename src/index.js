@@ -274,10 +274,13 @@
     ) {}
     */
 
-    if (!['Escape', 'Enter', ...numbers].includes(event.key) && go) {
-      if (!ringing && !synth.pending) UseSynth();
-      // else if(ringing)
-    }
+    if (
+      !['Escape', 'Enter', ...numbers].includes(event.key) &&
+      go &&
+      !ringing &&
+      !synth.speaking
+    )
+      UseSynth();
   }
 
   // Responds to every key board input, store the inputs and triggers all the events (delete,init,reset e play voice)
