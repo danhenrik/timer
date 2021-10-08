@@ -1,11 +1,8 @@
-'use strict';
-
 // Encapsulation (take the 'global' variable out of window object)
 (function () {
   const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
-  const timer = ['', '', '', '', '', ''];
-  // TODO: Make the go button into a pause button during the timerOut and then:
+  const timerArr = ['', '', '', '', '', ''];
   let go = false,
     digitsCounter = 2,
     timePointer = 0,
@@ -32,13 +29,13 @@
   // Buttons funcionalities
   document
     .getElementById('goButton')
-    .addEventListener('click', () => init(timer));
+    .addEventListener('click', () => init(timerArr));
   document
     .getElementById('okButton')
-    .addEventListener('click', () => reset(timer));
+    .addEventListener('click', () => reset(timerArr));
   document
     .getElementById('resetButton')
-    .addEventListener('click', () => reset(timer));
+    .addEventListener('click', () => reset(timerArr));
 
   // Plays tha alarm sound on the client browser.
   function playAlarm() {
@@ -62,11 +59,11 @@
     }, 1000);
   }
 
-  // Converts the input into valid timer (in case someone placed 90 seconds or something like that)
-  function convertTimer(timer) {
-    let hours = `${timer[0]}${timer[1]}`;
-    let minutes = `${timer[2]}${timer[3]}`;
-    let seconds = `${timer[4]}${timer[5]}`;
+  // Converts the input into valid timerArr (in case someone placed 90 seconds or something like that)
+  function convertTimer(timerArr) {
+    let hours = `${timerArr[0]}${timerArr[1]}`;
+    let minutes = `${timerArr[2]}${timerArr[3]}`;
+    let seconds = `${timerArr[4]}${timerArr[5]}`;
 
     if (seconds > 60) {
       minutes++;
@@ -78,6 +75,7 @@
       }
       seconds -= 60;
     }
+
     if (minutes > 60) {
       hours++;
       if (hours == 1) {
@@ -96,54 +94,63 @@
     }
 
     timerTransform(hours, minutes, seconds);
-    out(timer);
+    out(timerArr);
   }
 
   // Handles pause & resume
   function pauseResume(event) {
     if (pauseButton.textContent == 'Resume') {
       pauseButton.textContent = 'Pause';
-      initCountdown(timer);
-    } else if (!(timer[3] == '' && timer[4] == '0' && timer[5] == '0')) {
+      go = true;
+      initCountdown(timerArr);
+    } else if (
+      !(timerArr[3] == '' && timerArr[4] == '0' && timerArr[5] == '0')
+    ) {
       pauseButton.textContent = 'Resume';
+      go = false;
+      document.title += ' - Pause';
       clearInterval(interv);
     }
   }
 
+  // Take care of the timer counting
+  function timer(timerArr) {
+    let hours = `${timerArr[0]}${timerArr[1]}`;
+    let minutes = `${timerArr[2]}${timerArr[3]}`;
+    let seconds = `${timerArr[4]}${timerArr[5]}`;
+
+    seconds--;
+
+    if (seconds == -1) {
+      minutes--;
+      seconds = 59;
+    }
+
+    if (minutes == -1) {
+      hours--;
+      minutes = 59;
+    }
+
+    if (hours == -1) {
+      playAlarm();
+    } else {
+      timerTransform(hours, minutes, seconds);
+      out(timerArr);
+    }
+  }
+
   // Execute the countdown
-  function initCountdown(timer) {
+  function initCountdown(timerArr) {
     document.getElementById('goButton').hidden = true;
     const pauseButton = document.getElementById('pauseButton');
     pauseButton.hidden = false;
     pauseButton.removeEventListener('click', pauseResume);
     pauseButton.addEventListener('click', pauseResume);
-    interv = setInterval(() => {
-      let hours = `${timer[0]}${timer[1]}`;
-      let minutes = `${timer[2]}${timer[3]}`;
-      let seconds = `${timer[4]}${timer[5]}`;
-
-      seconds--;
-
-      if (seconds == -1) {
-        minutes--;
-        seconds = 59;
-      }
-
-      if (minutes == -1) {
-        hours--;
-        minutes = 59;
-      }
-
-      if (hours == -1) {
-        playAlarm();
-      } else {
-        timerTransform(hours, minutes, seconds);
-        out(timer);
-      }
-    }, 1000);
+    timer(timerArr);
+    interv = setInterval(() => timer(timerArr), 1000);
   }
 
-  // Standardize the inputs, making easier to manipulate the timer data in the other functions
+  // Standardize the inputs, making easier to manipulate the timerArr data in the other functions
   function timerTransform(hours, minutes, seconds) {
     seconds = seconds?.toString();
     minutes = minutes?.toString();
@@ -157,53 +164,63 @@
     }
     // Remove hour and it separator
     if (hours == 0) {
-      timer[0] = '';
-      timer[1] = '';
+      timerArr[0] = '';
+      timerArr[1] = '';
       separator[2].hidden = true;
     } else if (hours < 10 && separatorPointer < 4) {
-      timer[0] = '';
-      timer[1] = hours[0];
+      timerArr[0] = '';
+      timerArr[1] = hours[0];
     } else if (hours) {
-      timer[0] = hours[0];
-      timer[1] = hours[1];
+      timerArr[0] = hours[0];
+      timerArr[1] = hours[1];
     }
     // Remove minutes and it separator
     if (minutes == 0 && hours == 0) {
-      timer[2] = '';
-      timer[3] = '';
+      timerArr[2] = '';
+      timerArr[3] = '';
       separator[1].hidden = true;
     } else if (minutes < 10 && separatorPointer < 3) {
-      timer[2] = '';
-      timer[3] = minutes[0];
+      timerArr[2] = '';
+      timerArr[3] = minutes[0];
     } else if (minutes) {
-      timer[2] = minutes[0];
-      timer[3] = minutes[1];
+      timerArr[2] = minutes[0];
+      timerArr[3] = minutes[1];
     }
 
-    timer[4] = seconds[0];
-    timer[5] = seconds[1];
+    timerArr[4] = seconds[0];
+    timerArr[5] = seconds[1];
   }
 
-  // Just put the intern state of the timer in the screen.
-  function out(timer) {
+  // Just put the intern state of the timerArr in the screen.
+  function out(timerArr) {
     for (let i = 0; i < 6; i++) {
-      timerOut[i].textContent = timer[i];
+      timerOut[i].textContent = timerArr[i];
+    }
+    if (go) {
+      if (timerArr[0] || timerArr[1])
+        document.title = `Voice Timer - ${timerArr[0]}${timerArr[1]}:${timerArr[2]}${timerArr[3]}:${timerArr[4]}${timerArr[5]}`;
+      else if (timerArr[2] || timerArr[3])
+        document.title = `Voice Timer - ${timerArr[2]}${timerArr[3]}:${timerArr[4]}${timerArr[5]}`;
+      else if (timerArr[4] || timerArr[5])
+        document.title = `Voice Timer - ${timerArr[4]}${timerArr[5]}`;
+    } else {
+      document.title = 'Voice Timer';
     }
   }
 
-  // Centralized function that initializes the timer execution after the input is received
-  function init(timer) {
-    if (timer[5] != '' && !go) {
+  // Centralized function that initializes the timerArr execution after the input is received
+  function init(timerArr) {
+    if (timerArr[5] != '' && !go) {
       go = true;
-      convertTimer(timer);
-      initCountdown(timer);
+      convertTimer(timerArr);
+      initCountdown(timerArr);
     }
   }
 
-  // Resets the timer to the initial state
+  // Resets the timerArr to the initial state
   function reset() {
     clearInterval(interv);
-    for (let i = 0; i < 6; i++) timer[i] = '';
+    for (let i = 0; i < 6; i++) timerArr[i] = '';
     separator.forEach((sep) => (sep.hidden = true));
     go = false;
     digitsCounter = 2;
@@ -213,15 +230,15 @@
     document.getElementById('goButton').hidden = false;
     document.getElementById('okButton').hidden = true;
     document.getElementById('pauseButton').hidden = true;
-    out(timer);
+    out(timerArr);
     // TODO: Final animation
   }
 
   // Play a sound in the user browser saying the current time left.
   function UseSynth() {
-    const hours = parseInt(`${timer[0]}${timer[1]}`);
-    const minutes = parseInt(`${timer[2]}${timer[3]}`);
-    const seconds = parseInt(`${timer[4]}${timer[5]}`);
+    const hours = parseInt(`${timerArr[0]}${timerArr[1]}`);
+    const minutes = parseInt(`${timerArr[2]}${timerArr[3]}`);
+    const seconds = parseInt(`${timerArr[4]}${timerArr[5]}`);
 
     let output = '';
     if (hours) output += hours == 1 ? `${hours} hour` : `${hours} hours`;
@@ -255,19 +272,19 @@
           digitsCounter = 0;
         }
         for (let i = 0; i < 6; i++) {
-          timer[i] = timer[i + 1];
+          timerArr[i] = timerArr[i + 1];
         }
-        timer[5] = event.key;
+        timerArr[5] = event.key;
         timePointer++;
         digitsCounter++;
-        out(timer);
+        out(timerArr);
       }
     }
 
-    if (event.key == 'Backspace' && timer[5] != '' && !go) {
+    if (event.key == 'Backspace' && timerArr[5] != '' && !go) {
       for (let i = 5; i > -1; i--) {
-        if (i == 0) timer[i] = '';
-        else timer[i] = timer[i - 1];
+        if (i == 0) timerArr[i] = '';
+        else timerArr[i] = timerArr[i - 1];
       }
       if (digitsCounter == 1) {
         separator[separatorPointer - 1].hidden = true;
@@ -277,7 +294,7 @@
         digitsCounter--;
       }
       timePointer--;
-      out(timer);
+      out(timerArr);
     }
 
     if (
@@ -289,12 +306,12 @@
       UseSynth();
 
     if (event.key == 'Enter') {
-      init(timer);
+      const pauseButton = document.getElementById('pauseButton');
+      if (pauseButton.hidden == false) pauseResume();
+      else init(timerArr);
     }
 
-    if (event.key == 'Escape') {
-      reset(timer);
-    }
+    if (event.key == 'Escape') reset(timerArr);
   }
 
   // Responds to every key board input, store the inputs and triggers all the events (delete,init,reset e play voice)
