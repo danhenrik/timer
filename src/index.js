@@ -42,7 +42,7 @@
   // Plays tha alarm sound on the client browser.
   function playAlarm() {
     ringing = true;
-    const alarm;
+    let alarm;
     const audio = new Audio('./Alarm.mp3');
     audio.play();
     const stop = () => {
