@@ -6,8 +6,6 @@
 
   const timer = ['', '', '', '', '', ''];
   // TODO: Make the go button into a pause button during the timerOut and then:
-  // TODO: Go button becomes ok (cancel the bell ringing) at the end of timerOut (do this in the same moment that you start refining the front)
-  // TODO: No final substituir 00 s por um sino tocando ou algo do tipo (faz parte do embelezamento da página)
   let go = false,
     digitsCounter = 2,
     timePointer = 0,
@@ -36,6 +34,9 @@
     .getElementById('goButton')
     .addEventListener('click', () => init(timer));
   document
+    .getElementById('okButton')
+    .addEventListener('click', () => reset(timer));
+  document
     .getElementById('resetButton')
     .addEventListener('click', () => reset(timer));
 
@@ -52,6 +53,9 @@
       document.removeEventListener('keydown', stop);
       reset();
     }
+    document.getElementById('okButton').hidden = false;
+    document.getElementById('pauseButton').hidden = true;
+    document.getElementById('okButton').addEventListener('click', stop);
     document.addEventListener('keydown', stop);
     alarm = setInterval(() => {
       audio.play();
@@ -86,18 +90,33 @@
     }
 
     if (hours > 99) {
-      //* Need to be a max of 2 digits long
       hours = 99;
       // TODO: Pop-up
-      // ? window.alert(`The hours have to be 2 or 1 digits long;`);
+      window.alert(`The can have a maximum of 2 digits.`);
     }
 
     timerTransform(hours, minutes, seconds);
     out(timer);
   }
 
+  // Handles pause & resume
+  function pauseResume(event) {
+    if (pauseButton.textContent == 'Resume') {
+      pauseButton.textContent = 'Pause';
+      initCountdown(timer);
+    } else if (!(timer[3] == '' && timer[4] == '0' && timer[5] == '0')) {
+      pauseButton.textContent = 'Resume';
+      clearInterval(interv);
+    }
+  }
+
   // Execute the countdown
   function initCountdown(timer) {
+    document.getElementById('goButton').hidden = true;
+    const pauseButton = document.getElementById('pauseButton');
+    pauseButton.hidden = false;
+    pauseButton.removeEventListener('click', pauseResume);
+    pauseButton.addEventListener('click', pauseResume);
     interv = setInterval(() => {
       let hours = `${timer[0]}${timer[1]}`;
       let minutes = `${timer[2]}${timer[3]}`;
@@ -191,6 +210,9 @@
     timePointer = 0;
     separatorPointer = 0;
     ringing = false;
+    document.getElementById('goButton').hidden = false;
+    document.getElementById('okButton').hidden = true;
+    document.getElementById('pauseButton').hidden = true;
     out(timer);
     // TODO: Final animation
   }
@@ -223,6 +245,7 @@
     synth.speak(speech);
   }
 
+  // Handles the keydown event
   function handleKeyDown(event) {
     if (numbers.includes(event.key) && timePointer < 6 && !go) {
       if (!(event.key == '0' && timePointer == 0)) {
@@ -257,23 +280,6 @@
       out(timer);
     }
 
-    if (event.key == 'Enter') {
-      init(timer);
-    }
-
-    if (event.key == 'Escape') {
-      reset(timer);
-    }
-
-    /*
-    if (
-      !['Escape', 'Enter', ...numbers].includes(event.key) &&
-      !synth.pending &&
-      go &&
-      !ringing
-    ) {}
-    */
-
     if (
       !['Escape', 'Enter', ...numbers].includes(event.key) &&
       go &&
@@ -281,6 +287,14 @@
       !synth.speaking
     )
       UseSynth();
+
+    if (event.key == 'Enter') {
+      init(timer);
+    }
+
+    if (event.key == 'Escape') {
+      reset(timer);
+    }
   }
 
   // Responds to every key board input, store the inputs and triggers all the events (delete,init,reset e play voice)
