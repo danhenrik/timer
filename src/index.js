@@ -41,25 +41,21 @@
 
   // Plays tha alarm sound on the client browser.
   function playAlarm() {
+    clearInterval(interv);
     ringing = true;
     let alarm;
     const audio = new Audio('./Alarm.mp3');
     audio.play();
-    const stop = () => {
+    function stop() {
       audio.pause();
       clearInterval(alarm);
+      document.removeEventListener('keydown', stop);
       reset();
-    };
+    }
+    document.addEventListener('keydown', stop);
     alarm = setInterval(() => {
       audio.play();
-      document.addEventListener('keydown', () => {
-        stop();
-      });
-      document.addEventListener('click', () => {
-        stop();
-      });
     }, 1000);
-    clearInterval(interv);
   }
 
   // Converts the input into valid timer (in case someone placed 90 seconds or something like that)
@@ -201,92 +197,92 @@
 
   // Play a sound in the user browser saying the current time left.
   function UseSynth() {
+    const hours = parseInt(`${timer[0]}${timer[1]}`);
+    const minutes = parseInt(`${timer[2]}${timer[3]}`);
+    const seconds = parseInt(`${timer[4]}${timer[5]}`);
+
+    let output = '';
+    if (hours) output += hours == 1 ? `${hours} hour` : `${hours} hours`;
+
+    if (hours && minutes && !seconds) output += 'and';
+    if (hours && minutes && seconds) output += ', ';
+
+    if (minutes)
+      output += minutes == 1 ? `${minutes} minute` : `${minutes} minutes`;
+
+    if ((minutes && seconds) || (hours && seconds)) output += ' and';
+    if ((minutes && !seconds) || (hours && !seconds)) output += ' left.';
+
+    if (seconds)
+      output +=
+        seconds == 1 ? `${seconds} second left.` : `${seconds} seconds left.`;
+
+    const speech = new SpeechSynthesisUtterance(output);
+    const voices = synth.getVoices();
+    speech.voice = voices[2];
+    synth.speak(speech);
+  }
+
+  function handleKeyDown(event) {
+    if (numbers.includes(event.key) && timePointer < 6 && !go) {
+      if (!(event.key == '0' && timePointer == 0)) {
+        if (digitsCounter == 2) {
+          separator[separatorPointer].hidden = false;
+          separatorPointer++;
+          digitsCounter = 0;
+        }
+        for (let i = 0; i < 6; i++) {
+          timer[i] = timer[i + 1];
+        }
+        timer[5] = event.key;
+        timePointer++;
+        digitsCounter++;
+        out(timer);
+      }
+    }
+
+    if (event.key == 'Backspace' && timer[5] != '' && !go) {
+      for (let i = 5; i > -1; i--) {
+        if (i == 0) timer[i] = '';
+        else timer[i] = timer[i - 1];
+      }
+      if (digitsCounter == 1) {
+        separator[separatorPointer - 1].hidden = true;
+        digitsCounter = 2;
+        separatorPointer--;
+      } else {
+        digitsCounter--;
+      }
+      timePointer--;
+      out(timer);
+    }
+
+    if (event.key == 'Enter') {
+      init(timer);
+    }
+
+    if (event.key == 'Escape') {
+      reset(timer);
+    }
+
+    /*
     if (
       !['Escape', 'Enter', ...numbers].includes(event.key) &&
       !synth.pending &&
       go &&
       !ringing
-    ) {
-      const hours = parseInt(`${timer[0]}${timer[1]}`);
-      const minutes = parseInt(`${timer[2]}${timer[3]}`);
-      const seconds = parseInt(`${timer[4]}${timer[5]}`);
+    ) {}
+    */
 
-      let output = '';
-      if (hours) output += hours == 1 ? `${hours} hour` : `${hours} hours`;
-
-      if (hours && minutes && !seconds) output += 'and';
-      if (hours && minutes && seconds) output += ', ';
-
-      if (minutes)
-        output += minutes == 1 ? `${minutes} minute` : `${minutes} minutes`;
-
-      if ((minutes && seconds) || (hours && seconds)) output += ' and';
-      if ((minutes && !seconds) || (hours && !seconds)) output += ' left.';
-
-      if (seconds)
-        output +=
-          seconds == 1 ? `${seconds} second left.` : `${seconds} seconds left.`;
-
-      const speech = new SpeechSynthesisUtterance(output);
-      const voices = synth.getVoices();
-      speech.voice = voices[2];
-      synth.speak(speech);
+    if (!['Escape', 'Enter', ...numbers].includes(event.key) && go) {
+      if (!ringing && !synth.pending) UseSynth();
+      // else if(ringing)
     }
   }
 
   // Responds to every key board input, store the inputs and triggers all the events (delete,init,reset e play voice)
   function main() {
-    window.addEventListener('keydown', (event) => {
-      if (numbers.includes(event.key) && timePointer < 6 && !go) {
-        if (!(event.key == '0' && timePointer == 0)) {
-          if (digitsCounter == 2) {
-            separator[separatorPointer].hidden = false;
-            separatorPointer++;
-            digitsCounter = 0;
-          }
-          for (let i = 0; i < 6; i++) {
-            timer[i] = timer[i + 1];
-          }
-          timer[5] = event.key;
-          timePointer++;
-          digitsCounter++;
-          out(timer);
-        }
-      }
-
-      if (event.key == 'Backspace' && timer[5] != '' && !go) {
-        for (let i = 5; i > -1; i--) {
-          if (i == 0) timer[i] = '';
-          else timer[i] = timer[i - 1];
-        }
-        if (digitsCounter == 1) {
-          separator[separatorPointer - 1].hidden = true;
-          digitsCounter = 2;
-          separatorPointer--;
-        } else {
-          digitsCounter--;
-        }
-        timePointer--;
-        out(timer);
-      }
-
-      if (event.key == 'Enter') {
-        init(timer);
-      }
-
-      if (event.key == 'Escape') {
-        reset(timer);
-      }
-
-      if (
-        !['Escape', 'Enter', ...numbers].includes(event.key) &&
-        !synth.pending &&
-        go &&
-        !ringing
-      ) {
-        UseSynth();
-      }
-    });
+    document.addEventListener('keydown', handleKeyDown);
   }
   main();
 })();
