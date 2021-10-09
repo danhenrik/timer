@@ -9,7 +9,8 @@
     separatorPointer = 0,
     ringing = false,
     interv;
-  const synth = window.speechSynthesis;
+  const synth = window.speechSynthesis,
+    audio = new Audio('./Alarm.mp3');
 
   const timerOut = [
     document.getElementById('hours-0'),
@@ -42,10 +43,8 @@
     clearInterval(interv);
     ringing = true;
     let alarm;
-    const audio = new Audio('./Alarm.mp3');
     audio.play();
     function stop() {
-      audio.pause();
       clearInterval(alarm);
       document.removeEventListener('keydown', stop);
       reset();
@@ -226,6 +225,7 @@
     digitsCounter = 2;
     timePointer = 0;
     separatorPointer = 0;
+    audio.pause();
     ringing = false;
     document.getElementById('goButton').hidden = false;
     document.getElementById('okButton').hidden = true;
