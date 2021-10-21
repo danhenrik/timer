@@ -43,6 +43,7 @@
     clearInterval(interv);
     ringing = true;
     let alarm;
+    audio.currentTime = 0
     audio.play();
     function stop() {
       clearInterval(alarm);
