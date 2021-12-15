@@ -1,3 +1,6 @@
+// TODO: Migrate clock to react app (good oportunity to pratice)
+// TODO: At the end of timer keep counting negatively
+
 // Encapsulation (take the 'global' variable out of window object)
 (function () {
   const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
