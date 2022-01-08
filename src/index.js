@@ -1,5 +1,5 @@
 // TODO: Migrate clock to react app (good oportunity to pratice)
-// TODO: At the end of timer keep counting negatively
+// TODO: At the end of startTimer keep counting negatively
 
 // Encapsulation (take the 'global' variable out of window object)
 (function () {
@@ -7,11 +7,14 @@
 
   const timerArr = ['', '', '', '', '', ''];
   let go = false,
+    started = false,
+    ringing = false,
     digitsCounter = 2,
     timePointer = 0,
     separatorPointer = 0,
-    ringing = false,
-    interv;
+    interv,
+    alarm;
+
   const synth = window.speechSynthesis,
     audio = new Audio('./Alarm.mp3');
 
@@ -30,40 +33,76 @@
     document.getElementById('H-specifier'),
   ];
 
-  // Buttons funcionalities
-  document
-    .getElementById('goButton')
-    .addEventListener('click', () => init(timerArr));
-  document
-    .getElementById('okButton')
-    .addEventListener('click', () => reset(timerArr));
-  document
-    .getElementById('resetButton')
-    .addEventListener('click', () => reset(timerArr));
+  // Listeners used to interact with the clock
+  document.addEventListener('keydown', handleKeyDown);
 
-  // Plays tha alarm sound on the client browser.
-  function playAlarm() {
-    clearInterval(interv);
-    ringing = true;
-    let alarm;
-    audio.currentTime = 0
-    audio.play();
-    function stop() {
-      clearInterval(alarm);
-      document.removeEventListener('keydown', stop);
-      reset();
+  const button1 = document.getElementById('button-1');
+  button1.addEventListener('click', contextChecker);
+
+  const button2 = document.getElementById('button-2');
+  button2.addEventListener('click', () => reset(timerArr));
+
+  function contextChecker(event) {
+    // Finishied - Reset
+    if (ringing) reset();
+    // First start - Start
+    else if (!go && !started) start();
+    // Running - Pause
+    else if (go && started) pause();
+    // Paused - Resume
+    else if (!go && started) resume();
+  }
+
+  // Handles the keydown event
+  function handleKeyDown(event) {
+    if (numbers.includes(event.key) && timePointer < 6 && !started) {
+      if (!(event.key == '0' && timePointer == 0)) {
+        if (digitsCounter == 2) {
+          separator[separatorPointer].hidden = false;
+          separatorPointer++;
+          digitsCounter = 0;
+        }
+        for (let i = 0; i < 6; i++) {
+          timerArr[i] = timerArr[i + 1];
+        }
+        timerArr[5] = event.key;
+        timePointer++;
+        digitsCounter++;
+        out(timerArr);
+      }
     }
-    document.getElementById('okButton').hidden = false;
-    document.getElementById('pauseButton').hidden = true;
-    document.getElementById('okButton').addEventListener('click', stop);
-    document.addEventListener('keydown', stop);
-    alarm = setInterval(() => {
-      audio.play();
-    }, 1000);
+
+    if (event.key == 'Backspace' && timerArr[5] != '' && !go) {
+      for (let i = 5; i > -1; i--) {
+        if (i == 0) timerArr[i] = '';
+        else timerArr[i] = timerArr[i - 1];
+      }
+      if (digitsCounter == 1) {
+        separator[separatorPointer - 1].hidden = true;
+        digitsCounter = 2;
+        separatorPointer--;
+      } else {
+        digitsCounter--;
+      }
+      timePointer--;
+      out(timerArr);
+    }
+
+    if (
+      !['Escape', 'Enter', ...numbers].includes(event.key) &&
+      go &&
+      !ringing &&
+      !synth.speaking
+    )
+      UseSynth();
+
+    if (event.key == 'Enter') contextChecker(event);
+
+    if (event.key == 'Escape') reset(timerArr);
   }
 
   // Converts the input into valid timerArr (in case someone placed 90 seconds or something like that)
-  function convertTimer(timerArr) {
+  function normalizeTimer(timerArr) {
     let hours = `${timerArr[0]}${timerArr[1]}`;
     let minutes = `${timerArr[2]}${timerArr[3]}`;
     let seconds = `${timerArr[4]}${timerArr[5]}`;
@@ -98,59 +137,6 @@
 
     timerTransform(hours, minutes, seconds);
     out(timerArr);
-  }
-
-  // Handles pause & resume
-  function pauseResume(event) {
-    if (pauseButton.textContent == 'Resume') {
-      pauseButton.textContent = 'Pause';
-      go = true;
-      initCountdown(timerArr);
-    } else if (
-      !(timerArr[3] == '' && timerArr[4] == '0' && timerArr[5] == '0')
-    ) {
-      pauseButton.textContent = 'Resume';
-      go = false;
-      document.title += ' - Pause';
-      clearInterval(interv);
-    }
-  }
-
-  // Take care of the timer counting
-  function timer(timerArr) {
-    let hours = `${timerArr[0]}${timerArr[1]}`;
-    let minutes = `${timerArr[2]}${timerArr[3]}`;
-    let seconds = `${timerArr[4]}${timerArr[5]}`;
-
-    seconds--;
-
-    if (seconds == -1) {
-      minutes--;
-      seconds = 59;
-    }
-
-    if (minutes == -1) {
-      hours--;
-      minutes = 59;
-    }
-
-    if (hours == -1) {
-      playAlarm();
-    } else {
-      timerTransform(hours, minutes, seconds);
-      out(timerArr);
-    }
-  }
-
-  // Execute the countdown
-  function initCountdown(timerArr) {
-    document.getElementById('goButton').hidden = true;
-    const pauseButton = document.getElementById('pauseButton');
-    pauseButton.hidden = false;
-    pauseButton.removeEventListener('click', pauseResume);
-    pauseButton.addEventListener('click', pauseResume);
-    timer(timerArr);
-    interv = setInterval(() => timer(timerArr), 1000);
   }
 
   // Standardize the inputs, making easier to manipulate the timerArr data in the other functions
@@ -194,6 +180,110 @@
     timerArr[5] = seconds[1];
   }
 
+  // Execute the countdown
+  function startCountdown(timerArr) {
+    button1.classList.remove('glyphicon-play');
+    button1.classList.add('glyphicon-pause');
+    countdown(timerArr);
+  }
+
+  // Take care of the timer counting
+  function countdown(timerArr) {
+    interv = setInterval(() => {
+      let hours = `${timerArr[0]}${timerArr[1]}`;
+      let minutes = `${timerArr[2]}${timerArr[3]}`;
+      let seconds = `${timerArr[4]}${timerArr[5]}`;
+
+      seconds--;
+
+      if (seconds == -1) {
+        minutes--;
+        seconds = 59;
+      }
+
+      if (minutes == -1) {
+        hours--;
+        minutes = 59;
+      }
+
+      if (hours == -1) {
+        playAlarm();
+      } else {
+        timerTransform(hours, minutes, seconds);
+        out(timerArr);
+      }
+    }, 1000);
+  }
+
+  // Plays tha alarm sound on the client browser.
+  function playAlarm() {
+    clearInterval(interv);
+    ringing = true;
+    audio.currentTime = 0;
+    audio.play();
+    button1.classList.remove('glyphicon-pause');
+    button1.classList.add('glyphicon-ok');
+    document.addEventListener('keydown', stopAlarm);
+    alarm = setInterval(() => {
+      audio.play();
+    }, 1000);
+  }
+
+  function stopAlarm() {
+    audio.pause();
+    clearInterval(alarm);
+    document.removeEventListener('keydown', stopAlarm);
+  }
+
+  // Centralized function that initializes the timerArr execution after the input is received
+  function start() {
+    if (timerArr[5] != '' && !go) {
+      go = true;
+      started = true;
+      normalizeTimer(timerArr);
+      startCountdown(timerArr);
+    }
+  }
+
+  // Pause the clock
+  function pause() {
+    if (!(timerArr[3] == '' && timerArr[4] == '0' && timerArr[5] == '0')) {
+      button1.classList.remove('glyphicon-pause');
+      button1.classList.add('glyphicon-play');
+      go = false;
+      document.title += ' - Pause';
+      clearInterval(interv);
+      console.log('Pause');
+    }
+  }
+
+  // Resume the clock
+  function resume() {
+    go = true;
+    button1.classList.remove('glyphicon-play');
+    button1.classList.add('glyphicon-pause');
+    startCountdown(timerArr);
+    console.log('Resume');
+  }
+
+  // Resets the clock to the initial state
+  function reset() {
+    clearInterval(interv);
+    for (let i = 0; i < 6; i++) timerArr[i] = '';
+    separator.forEach((sep) => (sep.hidden = true));
+    go = false;
+    started = false;
+    digitsCounter = 2;
+    timePointer = 0;
+    separatorPointer = 0;
+    ringing = false;
+    button1.classList.remove('glyphicon-pause');
+    button1.classList.remove('glyphicon-ok');
+    button1.classList.add('glyphicon-play');
+    out(timerArr);
+    // TODO: Final animation
+  }
+
   // Just put the intern state of the timerArr in the screen.
   function out(timerArr) {
     for (let i = 0; i < 6; i++) {
@@ -209,33 +299,6 @@
     } else {
       document.title = 'Voice Timer';
     }
-  }
-
-  // Centralized function that initializes the timerArr execution after the input is received
-  function init(timerArr) {
-    if (timerArr[5] != '' && !go) {
-      go = true;
-      convertTimer(timerArr);
-      initCountdown(timerArr);
-    }
-  }
-
-  // Resets the timerArr to the initial state
-  function reset() {
-    clearInterval(interv);
-    for (let i = 0; i < 6; i++) timerArr[i] = '';
-    separator.forEach((sep) => (sep.hidden = true));
-    go = false;
-    digitsCounter = 2;
-    timePointer = 0;
-    separatorPointer = 0;
-    audio.pause();
-    ringing = false;
-    document.getElementById('goButton').hidden = false;
-    document.getElementById('okButton').hidden = true;
-    document.getElementById('pauseButton').hidden = true;
-    out(timerArr);
-    // TODO: Final animation
   }
 
   // Play a sound in the user browser saying the current time left.
@@ -265,62 +328,4 @@
     speech.voice = voices[2];
     synth.speak(speech);
   }
-
-  // Handles the keydown event
-  function handleKeyDown(event) {
-    if (numbers.includes(event.key) && timePointer < 6 && !go) {
-      if (!(event.key == '0' && timePointer == 0)) {
-        if (digitsCounter == 2) {
-          separator[separatorPointer].hidden = false;
-          separatorPointer++;
-          digitsCounter = 0;
-        }
-        for (let i = 0; i < 6; i++) {
-          timerArr[i] = timerArr[i + 1];
-        }
-        timerArr[5] = event.key;
-        timePointer++;
-        digitsCounter++;
-        out(timerArr);
-      }
-    }
-
-    if (event.key == 'Backspace' && timerArr[5] != '' && !go) {
-      for (let i = 5; i > -1; i--) {
-        if (i == 0) timerArr[i] = '';
-        else timerArr[i] = timerArr[i - 1];
-      }
-      if (digitsCounter == 1) {
-        separator[separatorPointer - 1].hidden = true;
-        digitsCounter = 2;
-        separatorPointer--;
-      } else {
-        digitsCounter--;
-      }
-      timePointer--;
-      out(timerArr);
-    }
-
-    if (
-      !['Escape', 'Enter', ...numbers].includes(event.key) &&
-      go &&
-      !ringing &&
-      !synth.speaking
-    )
-      UseSynth();
-
-    if (event.key == 'Enter') {
-      const pauseButton = document.getElementById('pauseButton');
-      if (pauseButton.hidden == false) pauseResume();
-      else init(timerArr);
-    }
-
-    if (event.key == 'Escape') reset(timerArr);
-  }
-
-  // Responds to every key board input, store the inputs and triggers all the events (delete,init,reset e play voice)
-  function main() {
-    document.addEventListener('keydown', handleKeyDown);
-  }
-  main();
 })();

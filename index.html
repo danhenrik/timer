@@ -5,28 +5,45 @@
     <title>Voice Timer</title>
     <link rel="stylesheet" href="style.css" />
     <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+      integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu"
+      crossorigin="anonymous"
+    />
+    <link
       rel="shortcut icon"
       href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABmJLR0QA/wD/AP+gvaeTAAAD6UlEQVRoge3a34tVVRQH8M/UNHewH+aMNvkwlRCEGCb0EoRRD5VSFgn9MMOHCvLJwofqLeghe5bxof6KCFQsKiYNmmqsHirHqQi0gX4hFpplcHvY+3jO5Jl77/lxz0zgFzabe/baa3332Xuvs/bal0tYWhhowEYbf+MMfsL3+BpH8CFONcChFrQ7lH9wCE+htVgEe0VC+hZsxNOYwJfmD+pH7Mbw4tDsjoRoHm7Ay/guI/ctNjdDrRg6DSTBZdiO2Yz8PktsdnoZSIIWXhWcQxufYqxPvAqjyEAS3IGTsd8s1lQlsRozeKuCjjIDgeulDmFWhZlZJkxtG/vLKlF+IDCCaekyK7Vn3pS+jZUlicBh4cNXFqvxg9QBFMKW2PEsbq1Aoi7cjr8ETpt67TQshBFtPN8fXqXwonSF9LTEkg6f4/IOck9o1jVega8Ebi90E25hLgrf20V2DMexoyLBInhQ4HZSl9hsRxSc7lFxIn8A4xUI9ooBqUt+spPgoSj0TAHlB2Kf09ip/0eD56K9gwsJjAph9TlcW0DxuDCI5HvxHm4qTbM7RgUPdh7L8wS2RiLvllC+0/yQ/AxeEoLBfmAy2tmSPMgaujPWh0sofgPvZ34vw+vC9Pdj73wQ6415jclaf6ik8hvxu4tPgafxeEmdC+GRqPvtvMbjsXFtBQPJRswrExiqoDuLdVHnsbzG32LjigoGBqSeL6/sqaA7i9Go75e8xiSWqfrWxoXMSN5A5irqTjAU9Z1LHvTDq5zAswu0lQ3n/4uO36pfo6HRmoxNuHhGXqtJ90odllYdmz2LIWFPzMWyR0ObfX9sfLgmY/1E8vG+4H6ze+SbWN/WJKOSWB/rCzOSHciRWN/dGJ3yuCfWuUfoFcoFjU1jRBo0XpM8zM7IKSFybeHRRqkVw2OC03hHCIlysV3YRJ81RKooBnBU4Litk2BLmuG7v/+8CiM56p7QwzXE7ih8VOfkQ9MYlB5zd/XSYVhI7S+1dFDygmcUuBTaLE3Qre8i2wQ24E+B031FO++TvoG64q8yWCW9N9lbRsGwNIn9Ma6sjVrvuApTkcOUCveMq4QwoI1P4u+mMIKPpNdxlbOaa6RTO6OZWGxDxuZxNaaXxqTL7KyQex2sS3kGg4J3Sjb2FK6r28iw1AG08YX6bl8H8ID5V9Z79fnufZP5t6/TQvakTNJiREjuJWFHspQKu9iyGBaWVxLOtIWIdBKvCHmndYLbHoplVLg02hplJqUJjyTs2GWR/gHRErLiB4UjQKe/a+SV88LJdJuKA6gzc74cdwlpzLW4WXDXV8f2P/Cz4EqPCanZSR1C8Uv4P+NfWOkxc7+CZd0AAAAASUVORK5CYII="
     />
   </head>
   <body>
-    <div class="wrapper">
-      <div class="container">
-        <!-- TODO: Depois do JS fazer essa página bonitinha -->
-        <span class="timer" id="hours-0"></span>
-        <span class="timer" id="hours-1"></span>
-        <span hidden class="specifier" id="H-specifier">h</span>
-        <span class="timer" id="minutes-0"></span>
-        <span class="timer" id="minutes-1"></span>
-        <span hidden class="specifier" id="M-specifier">m</span>
-        <span class="timer" id="seconds-0"></span>
-        <span class="timer" id="seconds-1"></span>
-        <span hidden class="specifier" id="S-specifier">s</span>
-        <br />
-        <button class="button" id="goButton">Go</button>
-        <button class="button" id="pauseButton" hidden>Pause</button>
-        <button class="button" id="okButton" hidden>Ok</button>
-        <button class="button" id="resetButton">Reset</button>
+    <div class="container-xl">
+      <div class="center">
+        <div class="wrapper">
+          <div class="timer">
+            <!-- TODO: Depois do JS fazer essa página bonitinha -->
+            <span class="timer-component" id="hours-0"></span>
+            <span class="timer-component" id="hours-1"></span>
+            <span hidden class="specifier" id="H-specifier">h</span>
+            <span class="timer-component" id="minutes-0"></span>
+            <span class="timer-component" id="minutes-1"></span>
+            <span hidden class="specifier" id="M-specifier">m</span>
+            <span class="timer-component" id="seconds-0"></span>
+            <span class="timer-component" id="seconds-1"></span>
+            <span hidden class="specifier" id="S-specifier">s</span>
+          </div>
+          <br />
+          <div class="btn-group" role="group">
+            <button
+              class="glyphicon glyphicon-play btn button"
+              id="button-1"
+              hidden
+            ></button>
+            <button
+              class="glyphicon glyphicon-stop btn button"
+              id="button-2"
+            ></button>
+          </div>
+        </div>
       </div>
     </div>
     <script src="src/index.js"></script>

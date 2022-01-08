@@ -1,26 +1,44 @@
 body {
-	background-color: #353535;
+  background-color: #274472;
+}
+
+.container {
+  height: 100%;
+  width: 1140px;
+  position: relative;
+}
+
+.center {
+  margin: 0;
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 }
 
 .wrapper {
-	text-align: center;
-}
-
-.wrapper span{
-	background-color: #353535;
-	color: #cecece;
-	border: none;
-	user-select: none;
-	border-color: #353535;
-	text-align: right;
-	width: 50%;
-	margin-top: 15%;
+  text-align: center;
 }
 
 .timer {
-	font-size: 12rem;
+  color: #c3e0e5;
+  user-select: none;
+  height: 30rem;
+}
+
+.timer-component {
+  font-size: 29rem;
 }
 
 .specifier {
-	font-size: 2rem;
+  font-size: 4rem;
+}
+
+.button {
+  margin-top: 4rem;
+  color: #c3e0e5;
+  border: none;
+  background-color: #41729f;
 }
