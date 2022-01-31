@@ -232,6 +232,7 @@
   function stopAlarm() {
     audio.pause();
     clearInterval(alarm);
+    reset();
     document.removeEventListener('keydown', stopAlarm);
   }
 
@@ -263,7 +264,6 @@
     button1.classList.remove('glyphicon-play');
     button1.classList.add('glyphicon-pause');
     startCountdown(timerArr);
-    console.log('Resume');
   }
 
   // Resets the clock to the initial state
