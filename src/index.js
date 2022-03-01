@@ -326,6 +326,8 @@
     const speech = new SpeechSynthesisUtterance(output);
     const voices = synth.getVoices();
     speech.voice = voices[2];
+
+    speech.lang = 'en-US';
     synth.speak(speech);
   }
 })();
